@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Automatic Bell/Messaging System Configuration</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="number"],
+    select,
+    input[type="date"] {
+      width: 100%;
+      padding: 8px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    table th, table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Automatic Bell/Messaging System Configuration</h1>
+
+    <h2>Manual Mode</h2>
+    <label for="fileNumber">File Number:</label>
+    <input type="number" id="fileNumber" min="1" max="24">
+    <button id="ringButton">Ring</button>
+
+    <h2>Programming Mode</h2>
+    <button id="programmingButton">Enter Programming Mode</button>
+
+    <div id="programmingMenu" style="display: none;">
+      <h3>Set Date & Time</h3>
+      <label for="date">Date:</label>
+      <input type="date" id="date">
+      <label for="time">Time:</label>
+      <input type="time" id="time">
+      <button id="saveDateTimeButton">Save</button>
+
+      <h3>Program Schedules</h3>
+      <label for="scheduleNumber">Schedule Number:</label>
+      <input type="number" id="scheduleNumber" min="1" max="24">
+      <label for="totalBells">Total Bells:</label>
+      <input type="number" id="totalBells" min="1" max="50">
+      <div id="bellsContainer"></div>
+      <button id="addBellButton">Add Bell</button>
+      <button id="saveScheduleButton">Save Schedule</button>
+
+      <h3>Weekdays</h3>
+      <div id="weekdayContainer"></div>
+      <button id="saveWeekdaysButton">Save Weekdays</button>
+
+      <h3>Monthly Holidays</h3>
+      <label for="monthlyHolidayOption">Select Monthly Holiday:</label>
+      <select id="monthlyHolidayOption">
+        <option value="secondSaturday">Second Saturday</option>
+        <option value="lastDayOfMonth">Last Day of Month</option>
+        <option value="specificDate">Specific Date</option>
+      </select>
+      <input type="date" id="specificDate" style="display: none;">
+      <button id="saveMonthlyHolidayButton">Save Monthly Holiday</button>
+    </div>
+  </div>
+
+  <script>
+    const programmingButton = document.getElementById('programmingButton');
+    const programmingMenu = document.getElementById('programmingMenu');
+
+    programmingButton.addEventListener('click', () => {
+      programmingMenu.style.display = 'block';
+    });
+
+    const addBellButton = document.getElementById('addBellButton');
+    const bellsContainer = document.getElementById('bellsContainer');
+
+    addBellButton.addEventListener('click', () => {
+      const bellTimeInput = document.createElement('input');
+      bellTimeInput.type = 'time';
+
+      const bellDurationInput = document.createElement('input');
+      bellDurationInput.type = 'number';
+      bellDurationInput.min = '1';
+
+      const bellContainer = document.createElement('div');
+      bellContainer.appendChild(bellTimeInput);
+      bellContainer.appendChild(bellDurationInput);
+
+      bellsContainer.appendChild(bellContainer);
+    });
+
+    const weekdayContainer = document.getElementById('weekdayContainer');
+    const schedules = [];
+    
+    const weekdays = [
+      { name: 'Monday', value: 'monday' },
+      { name: 'Tuesday', value: 'tuesday' },
+      { name: 'Wednesday', value: 'wednesday' },
+      { name: 'Thursday', value: 'thursday' },
+      { name: 'Friday', value: 'friday' },
+      { name: 'Saturday', value: 'saturday' },
+      { name: 'Sunday', value: 'sunday' },
+    ];
+    
+    const weekdayOptions = [
+      { name: 'Summer', value: 'summer' },
+      { name: 'Winter', value: 'winter' },
+      { name: 'Exam', value: 'exam' },
+    ];
+
+    function createScheduleDropdown() {
+      const scheduleSelect = document.createElement('select');
+      schedules.forEach(schedule => {
+        const option = document.createElement('option');
+        option.value = schedule;
+        option.textContent = schedule;
+        scheduleSelect.appendChild(option);
+      });
+      return scheduleSelect;
+    }
+
+    weekdays.forEach(weekday => {
+      const weekdayLabel = document.createElement('label');
+      weekdayLabel.textContent = weekday.name + ':';
+
+      const weekdayContainerItem = document.createElement('div');
+      weekdayContainerItem.appendChild(weekdayLabel);
+
+      const scheduleDropdown = createScheduleDropdown();
+      weekdayContainerItem.appendChild(scheduleDropdown);
+
+      weekdayContainer.appendChild(weekdayContainerItem);
+    });
+    
+    const weekdayOptionsContainer = document.createElement('div');
+    weekdayOptionsContainer.id = 'weekdayOptionsContainer';
+    weekdayContainer.appendChild(weekdayOptionsContainer);
+    
+    weekdayOptions.forEach(option => {
+      const optionLabel = document.createElement('label');
+      optionLabel.textContent = option.name + ':';
+
+      const optionCheckbox = document.createElement('input');
+      optionCheckbox.type = 'checkbox';
+      optionCheckbox.value = option.value;
+      optionCheckbox.addEventListener('change', () => {
+        const optionContainer = document.getElementById(option.value + 'Container');
+        optionContainer.style.display = optionCheckbox.checked ? 'block' : 'none';
+      });
+      
+      const optionContainer = document.createElement('div');
+      optionContainer.id = option.value + 'Container';
+      optionContainer.style.display = 'none';
+      
+      optionLabel.appendChild(optionCheckbox);
+      weekdayOptionsContainer.appendChild(optionLabel);
+      weekdayOptionsContainer.appendChild(optionContainer);
+    });
+
+    const saveScheduleButton = document.getElementById('saveScheduleButton');
+    const scheduleNumberInput = document.getElementById('scheduleNumber');
+    const totalBellsInput = document.getElementById('totalBells');
+
+    saveScheduleButton.addEventListener('click', () => {
+      const bells = Array.from(bellsContainer.querySelectorAll('div'));
+      const scheduleNumber = scheduleNumberInput.value;
+      const totalBells = totalBellsInput.value;
+      const bellTimes = [];
+      
+      bells.forEach(bell => {
+        const timeInput = bell.querySelector('input[type="time"]');
+        const durationInput = bell.querySelector('input[type="number"]');
+        
+        bellTimes.push({
+          time: timeInput.value,
+          duration: durationInput.value
+        });
+      });
+      
+      schedules[scheduleNumber - 1] = {
+        totalBells,
+        bellTimes
+      };
+
+      const scheduleDropdowns = document.querySelectorAll('#weekdayContainer select');
+      scheduleDropdowns.forEach(dropdown => {
+        const option = document.createElement('option');
+        option.value = scheduleNumber;
+        option.textContent = scheduleNumber;
+        dropdown.appendChild(option);
+      });
+    });
+
+    const saveWeekdaysButton = document.getElementById('saveWeekdaysButton');
+
+    saveWeekdaysButton.addEventListener('click', () => {
+      const weekdayContainers = Array.from(document.querySelectorAll('#weekdayContainer > div'));
+      weekdayContainers.forEach((weekdayContainer, index) => {
+        const scheduleDropdown = weekdayContainer.querySelector('select');
+        const selectedSchedule = scheduleDropdown.value;
+        const weekday = weekdays[index].value;
+        
+        // Save the selected schedule for the weekday
+        // You can perform your desired action with the selected schedule here
+        console.log(`Selected schedule for ${weekday}: ${selectedSchedule}`);
+      });
+    });
+
+    const monthlyHolidayOption = document.getElementById('monthlyHolidayOption');
+    const specificDateInput = document.getElementById('specificDate');
+
+    monthlyHolidayOption.addEventListener('change', () => {
+      const selectedOption = monthlyHolidayOption.value;
+      if (selectedOption === 'specificDate') {
+        specificDateInput.style.display = 'block';
+      } else {
+        specificDateInput.style.display = 'none';
+      }
+    });
+
+    const saveMonthlyHolidayButton = document.getElementById('saveMonthlyHolidayButton');
+
+    saveMonthlyHolidayButton.addEventListener('click', () => {
+      const selectedOption = monthlyHolidayOption.value;
+      const specificDate = specificDateInput.value;
+
+      // Perform your desired action with the selected monthly holiday option and date here
+      console.log(`Selected monthly holiday option: ${selectedOption}`);
+      console.log(`Selected specific date: ${specificDate}`);
+    });
+  </script>
+</body>
+</html>
